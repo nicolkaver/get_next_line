@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nboratko <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/06 14:36:20 by nboratko          #+#    #+#             */
-/*   Updated: 2021/12/09 12:31:29 by nboratko         ###   ########.fr       */
+/*   Created: 2022/05/10 11:25:58 by nboratko          #+#    #+#             */
+/*   Updated: 2022/05/10 11:26:19 by nboratko         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,14 +47,9 @@ char	*get_final_line(char *tmp)
 		i++;
 	str = (char *)malloc(sizeof(char) * (i + 2));
 	if (!str)
-		return (NULL);
+		return (free(tmp), NULL);
 	i = 0;
 	while (tmp[i] && tmp[i] != '\n')
-	{
-		str[i] = tmp[i];
-		i++;
-	}
-	if (tmp[i] == '\n')
 	{
 		str[i] = tmp[i];
 		i++;
@@ -79,7 +74,7 @@ char	*get_rest(char *tmp)
 	len = ft_strlen(tmp);
 	str = (char *)malloc(sizeof(char) * (len - i + 1));
 	if (!str)
-		return (NULL);
+		return (free(tmp), NULL);
 	i++;
 	while (tmp[i])
 		str[j++] = tmp[i++];
@@ -91,14 +86,19 @@ char	*get_rest(char *tmp)
 char	*get_next_line(int fd)
 {
 	char		*ret;
-	static char	*tmp[MAX_FD + 1];
+	static char	*tmp;
 
+	if (fd == 1025)
+		return (free(tmp), NULL);
 	if (fd < 0 || fd > MAX_FD || BUFFER_SIZE <= 0)
 		return (NULL);
-	tmp[fd] = get_raw_line(fd, tmp[fd]);
-	if (!tmp[fd])
+	tmp = get_raw_line(fd, tmp);
+	if (tmp == NULL)
+	{
+		free(tmp);
 		return (NULL);
-	ret = get_final_line(tmp[fd]);
-	tmp[fd] = get_rest(tmp[fd]);
+	}
+	ret = get_final_line(tmp);
+	tmp = get_rest(tmp);
 	return (ret);
 }
